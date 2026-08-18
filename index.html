@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es-PY">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Finanzas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ============ LANDING ============ -->
+<div id="screen-landing" class="landing">
+  <div class="landing-header">
+    <p class="landing-eyebrow">Finanzas</p>
+    <h1 class="landing-title">¿Qué ledger abrimos?</h1>
+  </div>
+  <div class="ledger-grid">
+    <button class="ledger-card" data-section="daniel" style="--spine:#2f5d50">
+      <p class="ledger-tag">Personal</p>
+      <p class="ledger-name">Mis finanzas</p>
+      <p class="ledger-hint">Efectivo, bancos y ahorros propios</p>
+    </button>
+    <button class="ledger-card" data-section="pareja" style="--spine:#3d5a73">
+      <p class="ledger-tag">Personal</p>
+      <p class="ledger-name">Finanzas de mi pareja</p>
+      <p class="ledger-hint">Efectivo, bancos y ahorros propios</p>
+    </button>
+    <button class="ledger-card" data-section="compartido" style="--spine:#b0793c">
+      <p class="ledger-tag">Compartido</p>
+      <p class="ledger-name">Ahorro en pareja</p>
+      <p class="ledger-hint">Fondo común y metas conjuntas</p>
+    </button>
+  </div>
+</div>
+
+<!-- ============ LOGIN OVERLAY ============ -->
+<div id="login-overlay" class="overlay hidden">
+  <div id="login-box" class="login-box">
+    <h2 id="login-title">Sección</h2>
+    <p>Ingresá la contraseña para continuar.</p>
+    <form id="login-form">
+      <div class="field">
+        <label for="login-password">Contraseña</label>
+        <input type="password" id="login-password" autocomplete="current-password" required />
+      </div>
+      <p id="login-error" class="error-text"></p>
+      <button type="submit" id="login-submit" class="btn wide">Entrar</button>
+      <button type="button" id="login-cancel" class="btn secondary wide" style="margin-top:8px;">Cancelar</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="screen-app" class="app-shell hidden">
+  <div class="app-header">
+    <div class="app-header-left">
+      <h1 class="app-title" id="app-title">—</h1>
+      <span class="app-total" id="app-total"></span>
+    </div>
+    <button id="logout-btn" class="btn ghost">Cerrar sección</button>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="dashboard">Dashboard</button>
+    <button class="tab" data-tab="movimientos">Movimientos</button>
+    <button class="tab" data-tab="cuentas">Cuentas</button>
+    <button class="tab" data-tab="reportes">Reportes</button>
+    <button class="tab hidden" id="tab-metas" data-tab="metas">Metas</button>
+    <button class="tab" data-tab="ajustes">Ajustes</button>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <section id="panel-dashboard" class="panel active">
+    <div class="cards-row" id="dashboard-cards"></div>
+    <div class="section-heading"><h3>Últimos movimientos</h3></div>
+    <div id="dashboard-recent"></div>
+  </section>
+
+  <!-- MOVIMIENTOS -->
+  <section id="panel-movimientos" class="panel">
+    <form id="txn-form" class="form-grid">
+      <div class="field">
+        <label for="txn-type">Tipo</label>
+        <select id="txn-type">
+          <option value="gasto">Gasto</option>
+          <option value="ingreso">Ingreso</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="txn-account">Cuenta</label>
+        <select id="txn-account"></select>
+      </div>
+      <div class="field">
+        <label for="txn-category">Categoría</label>
+        <select id="txn-category"></select>
+      </div>
+      <div class="field">
+        <label for="txn-amount">Monto</label>
+        <input type="number" id="txn-amount" min="0" step="1" placeholder="0" />
+      </div>
+      <div class="field">
+        <label for="txn-date">Fecha</label>
+        <input type="date" id="txn-date" />
+      </div>
+      <div class="field">
+        <label for="txn-description">Descripción</label>
+        <input type="text" id="txn-description" placeholder="Opcional" />
+      </div>
+      <div class="btn-wrap">
+        <button type="submit" class="btn wide">Agregar movimiento</button>
+      </div>
+    </form>
+
+    <table class="txn-table">
+      <thead>
+        <tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th>Cuenta</th><th>Monto</th><th></th></tr>
+      </thead>
+      <tbody id="txn-tbody"></tbody>
+    </table>
+  </section>
+
+  <!-- CUENTAS -->
+  <section id="panel-cuentas" class="panel">
+    <form id="acc-form" class="form-grid">
+      <div class="field">
+        <label for="acc-name">Nombre</label>
+        <input type="text" id="acc-name" placeholder="Ej: Itaú caja de ahorro" required />
+      </div>
+      <div class="field">
+        <label for="acc-type">Tipo</label>
+        <select id="acc-type">
+          <option value="efectivo">Efectivo</option>
+          <option value="banco">Banco</option>
+          <option value="ahorro">Ahorro</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="acc-initial">Saldo inicial</label>
+        <input type="number" id="acc-initial" placeholder="0" />
+      </div>
+      <div class="btn-wrap">
+        <button type="submit" class="btn wide">Agregar cuenta</button>
+      </div>
+    </form>
+    <div id="accounts-list"></div>
+
+    <div class="section-heading" style="margin-top:28px;"><h3>Categorías</h3></div>
+    <form id="cat-form" class="form-grid">
+      <div class="field">
+        <label for="cat-name">Nombre</label>
+        <input type="text" id="cat-name" placeholder="Ej: Suscripciones" required />
+      </div>
+      <div class="field">
+        <label for="cat-type">Tipo</label>
+        <select id="cat-type">
+          <option value="gasto">Gasto</option>
+          <option value="ingreso">Ingreso</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="cat-color">Color</label>
+        <input type="color" id="cat-color" value="#2f5d50" />
+      </div>
+      <div class="btn-wrap">
+        <button type="submit" class="btn wide">Agregar categoría</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- REPORTES -->
+  <section id="panel-reportes" class="panel">
+    <div class="charts-row">
+      <div class="chart-card">
+        <h4>Ingresos vs. gastos (últimos 6 meses)</h4>
+        <canvas id="chart-trend" height="220"></canvas>
+      </div>
+      <div class="chart-card">
+        <h4>Gastos por categoría (este mes)</h4>
+        <canvas id="chart-category" height="220"></canvas>
+        <p id="chart-category-empty" class="empty-state hidden">Sin gastos cargados este mes.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- METAS (solo compartido) -->
+  <section id="panel-metas" class="panel">
+    <form id="goal-form" class="form-grid">
+      <div class="field">
+        <label for="goal-name">Meta</label>
+        <input type="text" id="goal-name" placeholder="Ej: Viaje a Bariloche" required />
+      </div>
+      <div class="field">
+        <label for="goal-target">Monto objetivo</label>
+        <input type="number" id="goal-target" placeholder="0" required />
+      </div>
+      <div class="field">
+        <label for="goal-deadline">Fecha límite</label>
+        <input type="date" id="goal-deadline" />
+      </div>
+      <div class="btn-wrap">
+        <button type="submit" class="btn wide">Crear meta</button>
+      </div>
+    </form>
+    <div id="goals-list"></div>
+  </section>
+
+  <!-- AJUSTES -->
+  <section id="panel-ajustes" class="panel">
+    <div class="section-heading"><h3>Cambiar contraseña de esta sección</h3></div>
+    <form id="pw-form" class="form-grid">
+      <div class="field">
+        <label for="pw-current">Contraseña actual</label>
+        <input type="password" id="pw-current" required />
+      </div>
+      <div class="field">
+        <label for="pw-new">Nueva contraseña</label>
+        <input type="password" id="pw-new" required minlength="6" />
+      </div>
+      <div class="field">
+        <label for="pw-confirm">Confirmar nueva</label>
+        <input type="password" id="pw-confirm" required minlength="6" />
+      </div>
+      <div class="btn-wrap">
+        <button type="submit" class="btn wide">Actualizar contraseña</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
