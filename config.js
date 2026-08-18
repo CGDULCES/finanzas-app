@@ -4,7 +4,7 @@
 // =====================================================================
 
 const CONFIG = {
-  SUPABASE_URL: "https://eefvzaifkcnoartezkte.supabase.co/rest/v1/",
+  SUPABASE_URL: "https://eefvzaifkcnoartezkte.supabase.co",
   SUPABASE_ANON_KEY: "sb_publishable_AduCWjzZEYptm24qvQ5atQ_ZiNrOEj1",
 
   // Podés cambiar los nombres visibles de cada sección acá.
