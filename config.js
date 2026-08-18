@@ -5,7 +5,7 @@
 
 const CONFIG = {
   SUPABASE_URL: "https://eefvzaifkcnoartezkte.supabase.co",
-  SUPABASE_ANON_KEY: "sb_publishable_AduCWjzZEYptm24qvQ5atQ_ZiNrOEj1",
+  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlZnZ6YWlma2Nub2FydGV6a3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwMjk4MTgsImV4cCI6MjEwMjYwNTgxOH0.50GgxJob2jddE5gtKeCqHpQoJsAZYov52FPhXu81Upo",
 
   // Podés cambiar los nombres visibles de cada sección acá.
   SECTIONS: {
