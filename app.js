@@ -164,6 +164,7 @@ function renderAll() {
   renderMovimientos();
   renderCuentas();
   renderCategorySelects();
+  renderCategoriesList();
   if (state.section === "compartido") renderMetas();
 }
 
@@ -310,18 +311,32 @@ function renderCuentas() {
   `).join("");
 }
 
+function refreshAccountNameField() {
+  const type = $("#acc-type").value;
+  const field = $("#acc-name-field");
+  const input = $("#acc-name");
+  if (type === "efectivo") {
+    field.classList.add("hidden");
+    input.required = false;
+  } else {
+    field.classList.remove("hidden");
+    input.required = true;
+  }
+}
+
 async function handleAddAccount(e) {
   e.preventDefault();
-  const name = $("#acc-name").value.trim();
   const type = $("#acc-type").value;
+  const name = type === "efectivo" ? "Efectivo" : $("#acc-name").value.trim();
   const initial = parseFloat($("#acc-initial").value || "0");
-  if (!name) { toast("Ponele un nombre a la cuenta."); return; }
+  if (!name) { toast("Ponele un nombre al banco."); return; }
   try {
     const { error } = await sb.rpc("add_account", { p_token: state.token, p_section: state.section, p_name: name, p_type: type, p_initial: initial });
     if (error) throw error;
     await loadState();
     renderAll();
     $("#acc-form").reset();
+    refreshAccountNameField();
     toast("Cuenta agregada.");
   } catch (err) {
     console.error(err);
@@ -363,6 +378,34 @@ function renderCategorySelects() {
   refreshCategorySelect();
 
   $("#txn-date").value = new Date().toISOString().slice(0, 10);
+}
+
+function renderCategoriesList() {
+  const el = $("#categories-list");
+  if (!el) return;
+  if (!state.data.categories.length) {
+    el.innerHTML = `<p class="empty-state">Todavía no cargaste categorías.</p>`;
+    return;
+  }
+  el.innerHTML = state.data.categories.map((c) => `
+    <div class="chip" style="background:${c.color};display:inline-flex;align-items:center;gap:8px;margin:0 8px 8px 0;">
+      ${escapeHtml(c.name)} · ${c.type === "ingreso" ? "Ingreso" : "Gasto"}
+      <button data-del-cat="${c.id}" style="background:none;border:none;color:#fff;cursor:pointer;font-weight:700;padding:0;line-height:1;">×</button>
+    </div>
+  `).join("");
+}
+
+async function handleDeleteCategory(id) {
+  try {
+    const { error } = await sb.rpc("delete_category", { p_token: state.token, p_section: state.section, p_category_id: id });
+    if (error) throw error;
+    await loadState();
+    renderAll();
+    toast("Categoría eliminada.");
+  } catch (err) {
+    console.error(err);
+    toast("No se pudo eliminar la categoría.");
+  }
 }
 
 async function handleAddCategory(e) {
@@ -597,6 +640,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   $("#txn-form").addEventListener("submit", handleAddTransaction);
   $("#acc-form").addEventListener("submit", handleAddAccount);
+  $("#acc-type").addEventListener("change", refreshAccountNameField);
+  refreshAccountNameField();
   $("#cat-form").addEventListener("submit", handleAddCategory);
   $("#goal-form")?.addEventListener("submit", handleAddGoal);
   $("#pw-form").addEventListener("submit", handleChangePassword);
@@ -606,6 +651,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (delTxn) return handleDeleteTransaction(delTxn.dataset.delTxn);
     const delAcc = e.target.closest("[data-del-acc]");
     if (delAcc) return handleDeleteAccount(delAcc.dataset.delAcc);
+    const delCat = e.target.closest("[data-del-cat]");
+    if (delCat) return handleDeleteCategory(delCat.dataset.delCat);
     const goalAdd = e.target.closest("[data-goal-add]");
     if (goalAdd) return handleGoalAdd(goalAdd.dataset.goalAdd);
     const goalDel = e.target.closest("[data-goal-del]");
