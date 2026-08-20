@@ -3,7 +3,7 @@
 -- Ejecutar completo en el SQL Editor de tu proyecto Supabase.
 -- =====================================================================
 
-create extension if not exists pgcrypto;
+create extension if not exists pgcrypto with schema extensions;
 
 -- ---------------------------------------------------------------------
 -- TABLAS
@@ -31,7 +31,8 @@ create table if not exists categories (
   section_key text not null references sections(key) on delete cascade,
   name text not null,
   type text not null check (type in ('ingreso','gasto')),
-  color text not null default '#2F5D50'
+  color text not null default '#2F5D50',
+  unique (section_key, name, type)
 );
 
 create table if not exists transactions (
@@ -100,7 +101,7 @@ $$;
 -- token de sesion valido por 24 horas si coincide.
 create or replace function login(p_section text, p_password text)
 returns uuid
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public, extensions as $$
 declare
   v_hash text;
   v_token uuid;
@@ -131,7 +132,7 @@ $$;
 -- Cambia la contrasena de una seccion (exige la sesion ya iniciada)
 create or replace function change_password(p_token uuid, p_section text, p_new_password text)
 returns boolean
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public, extensions as $$
 begin
   if not _valid_session(p_token, p_section) then
     raise exception 'unauthorized';

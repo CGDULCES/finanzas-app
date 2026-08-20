@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es-PY">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Carga rápida — Finanzas</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="+ Finanzas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ============ ELEGIR LEDGER ============ -->
+<div id="q-screen-pick" class="quick-shell">
+  <p class="landing-eyebrow">Carga rápida</p>
+  <h1 class="landing-title" style="font-size:28px;">¿Dónde cargamos?</h1>
+  <div class="quick-ledger-list" id="q-ledger-list"></div>
+</div>
+
+<!-- ============ LOGIN ============ -->
+<div id="q-screen-login" class="quick-shell hidden">
+  <button type="button" class="quick-back" id="q-login-back">← Volver</button>
+  <h2 id="q-login-title">—</h2>
+  <form id="q-login-form">
+    <div class="field">
+      <label for="q-login-password">Contraseña</label>
+      <input type="password" id="q-login-password" autocomplete="current-password" required />
+    </div>
+    <p id="q-login-error" class="error-text"></p>
+    <button type="submit" class="btn wide">Entrar</button>
+  </form>
+</div>
+
+<!-- ============ FORM RÁPIDO ============ -->
+<div id="q-screen-form" class="quick-shell hidden">
+  <div class="quick-top">
+    <button type="button" class="quick-back" id="q-form-switch">← Cambiar sección</button>
+    <span id="q-form-title" class="quick-title"></span>
+  </div>
+
+  <div class="quick-type-toggle">
+    <button type="button" class="quick-type-btn active" data-type="gasto">Gasto</button>
+    <button type="button" class="quick-type-btn" data-type="ingreso">Ingreso</button>
+  </div>
+
+  <form id="q-txn-form">
+    <input type="number" id="q-amount" class="quick-amount-input" inputmode="decimal" placeholder="0" min="0" step="1" autocomplete="off" required />
+
+    <div class="field">
+      <label for="q-account">Cuenta</label>
+      <select id="q-account" required></select>
+    </div>
+    <div class="field">
+      <label for="q-category">Categoría</label>
+      <select id="q-category"></select>
+    </div>
+    <div class="field">
+      <label for="q-desc">Descripción (opcional)</label>
+      <input type="text" id="q-desc" placeholder="Ej: Almuerzo" />
+    </div>
+
+    <button type="submit" class="btn wide quick-save-btn">Guardar</button>
+  </form>
+
+  <p class="quick-full-link"><a href="index.html">Ver dashboard completo →</a></p>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="quick.js"></script>
+</body>
+</html>

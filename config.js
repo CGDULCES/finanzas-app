@@ -9,9 +9,9 @@ const CONFIG = {
 
   // Podés cambiar los nombres visibles de cada sección acá.
   SECTIONS: {
-    daniel: { label: "Mis finanzas", tag: "Personal · Daniel", color: "#2f5d50" },
-    pareja: { label: "Finanzas de mi pareja", tag: "Personal · Pareja", color: "#3d5a73" },
-    compartido: { label: "Ahorro en pareja", tag: "Compartido", color: "#b0793c" },
+    daniel: { label: "Dani Benega", tag: "Personal · Dani", color: "#585C61" },
+    pareja: { label: "Guadalupe Galeano", tag: "Personal · Guadalupe", color: "#6B4C86" },
+    compartido: { label: "Ahorro Mutuo", tag: "Compartido", color: "#6E5B72" },
   },
 
   CURRENCY: "PYG",
