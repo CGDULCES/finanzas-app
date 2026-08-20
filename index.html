@@ -141,8 +141,9 @@
         <label for="acc-initial">Saldo inicial</label>
         <input type="number" id="acc-initial" placeholder="0" />
       </div>
-      <div class="btn-wrap">
-        <button type="submit" class="btn wide">Agregar cuenta</button>
+      <div class="btn-wrap" style="gap:8px;">
+        <button type="submit" id="acc-submit" class="btn wide">Agregar cuenta</button>
+        <button type="button" id="acc-cancel-edit" class="btn secondary hidden">Cancelar</button>
       </div>
     </form>
     <div id="accounts-list"></div>

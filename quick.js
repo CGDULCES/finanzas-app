@@ -9,8 +9,6 @@ const qs = { section: null, token: null, accounts: [], categories: [], type: "ga
 function $(sel, root = document) { return root.querySelector(sel); }
 function $all(sel, root = document) { return [...root.querySelectorAll(sel)]; }
 
-function sessionKey(section) { return `finanzas_session_${section}`; }
-
 function toast(msg) {
   const el = $("#toast");
   el.textContent = msg;
@@ -46,14 +44,6 @@ function renderLedgerList() {
 
 async function openSection(section) {
   qs.section = section;
-  const token = localStorage.getItem(sessionKey(section));
-  if (token) {
-    qs.token = token;
-    const ok = await loadAccountsAndCategories();
-    if (ok) { showForm(); return; }
-    localStorage.removeItem(sessionKey(section));
-    qs.token = null;
-  }
   const cfg = CONFIG.SECTIONS[section];
   $("#q-login-title").textContent = cfg.label;
   $("#q-login-error").textContent = "";
@@ -74,7 +64,6 @@ async function handleQuickLogin(e) {
       return;
     }
     qs.token = data;
-    localStorage.setItem(sessionKey(qs.section), data);
     const ok = await loadAccountsAndCategories();
     if (ok) showForm();
   } catch (err) {
@@ -156,6 +145,9 @@ async function handleQuickSave(e) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  Object.keys(localStorage)
+    .filter((k) => k.startsWith("finanzas_session_"))
+    .forEach((k) => localStorage.removeItem(k));
   renderLedgerList();
   $("#q-login-back").addEventListener("click", () => showScreen("q-screen-pick"));
   $("#q-login-form").addEventListener("submit", handleQuickLogin);

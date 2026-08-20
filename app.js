@@ -54,24 +54,6 @@ function accountById(id) {
 // Sesión / navegación
 // ---------------------------------------------------------------------
 
-function sessionKey(section) { return `finanzas_session_${section}`; }
-
-async function tryResumeSession(section) {
-  const token = localStorage.getItem(sessionKey(section));
-  if (!token) return false;
-  state.token = token;
-  state.section = section;
-  try {
-    await loadState();
-    return true;
-  } catch (e) {
-    localStorage.removeItem(sessionKey(section));
-    state.token = null;
-    state.section = null;
-    return false;
-  }
-}
-
 function openLogin(section) {
   const cfg = CONFIG.SECTIONS[section];
   $("#login-title").textContent = cfg.label;
@@ -102,7 +84,6 @@ async function handleLogin(e) {
     }
     state.token = data;
     state.section = section;
-    localStorage.setItem(sessionKey(section), data);
     await loadState();
     closeLogin();
     showApp();
@@ -128,7 +109,6 @@ async function loadState() {
 async function logout() {
   if (state.token) {
     try { await sb.rpc("logout", { p_token: state.token }); } catch (e) { /* noop */ }
-    localStorage.removeItem(sessionKey(state.section));
   }
   state.token = null;
   state.section = null;
@@ -305,10 +285,33 @@ function renderCuentas() {
           <p class="stat-value" style="font-size:18px;">${escapeHtml(a.name)}</p>
           <p class="stat-sub">Saldo inicial ${fmt.format(a.initial_balance)} · Saldo actual ${fmt.format(accountBalance(a))}</p>
         </div>
-        <div class="row-actions"><button data-del-acc="${a.id}">Archivar</button></div>
+        <div class="row-actions" style="display:flex;gap:12px;"><button data-edit-acc="${a.id}">Editar</button><button data-del-acc="${a.id}">Archivar</button></div>
       </div>
     </div>
   `).join("");
+}
+
+let editingAccountId = null;
+
+function startEditAccount(id) {
+  const acc = accountById(id);
+  if (!acc) return;
+  editingAccountId = id;
+  $("#acc-type").value = acc.type;
+  $("#acc-name").value = acc.name;
+  $("#acc-initial").value = acc.initial_balance;
+  refreshAccountNameField();
+  $("#acc-submit").textContent = "Guardar cambios";
+  $("#acc-cancel-edit").classList.remove("hidden");
+  $("#acc-form").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function cancelEditAccount() {
+  editingAccountId = null;
+  $("#acc-form").reset();
+  refreshAccountNameField();
+  $("#acc-submit").textContent = "Agregar cuenta";
+  $("#acc-cancel-edit").classList.add("hidden");
 }
 
 function refreshAccountNameField() {
@@ -331,16 +334,22 @@ async function handleAddAccount(e) {
   const initial = parseFloat($("#acc-initial").value || "0");
   if (!name) { toast("Ponele un nombre al banco."); return; }
   try {
-    const { error } = await sb.rpc("add_account", { p_token: state.token, p_section: state.section, p_name: name, p_type: type, p_initial: initial });
+    const { error } = editingAccountId
+      ? await sb.rpc("update_account", { p_token: state.token, p_section: state.section, p_account_id: editingAccountId, p_name: name, p_type: type, p_initial: initial })
+      : await sb.rpc("add_account", { p_token: state.token, p_section: state.section, p_name: name, p_type: type, p_initial: initial });
     if (error) throw error;
+    const wasEditing = !!editingAccountId;
+    editingAccountId = null;
     await loadState();
     renderAll();
     $("#acc-form").reset();
     refreshAccountNameField();
-    toast("Cuenta agregada.");
+    $("#acc-submit").textContent = "Agregar cuenta";
+    $("#acc-cancel-edit").classList.add("hidden");
+    toast(wasEditing ? "Cuenta actualizada." : "Cuenta agregada.");
   } catch (err) {
     console.error(err);
-    toast("No se pudo agregar la cuenta.");
+    toast(editingAccountId ? "No se pudo guardar los cambios." : "No se pudo agregar la cuenta.");
   }
 }
 
@@ -623,13 +632,12 @@ function escapeHtml(str) {
 // ---------------------------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", () => {
+  Object.keys(localStorage)
+    .filter((k) => k.startsWith("finanzas_session_"))
+    .forEach((k) => localStorage.removeItem(k));
+
   $all(".ledger-card").forEach((card) => {
-    card.addEventListener("click", async () => {
-      const section = card.dataset.section;
-      const resumed = await tryResumeSession(section);
-      if (resumed) { showApp(); return; }
-      openLogin(section);
-    });
+    card.addEventListener("click", () => openLogin(card.dataset.section));
   });
 
   $("#login-cancel").addEventListener("click", closeLogin);
@@ -641,6 +649,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#txn-form").addEventListener("submit", handleAddTransaction);
   $("#acc-form").addEventListener("submit", handleAddAccount);
   $("#acc-type").addEventListener("change", refreshAccountNameField);
+  $("#acc-cancel-edit").addEventListener("click", cancelEditAccount);
   refreshAccountNameField();
   $("#cat-form").addEventListener("submit", handleAddCategory);
   $("#goal-form")?.addEventListener("submit", handleAddGoal);
@@ -649,6 +658,8 @@ document.addEventListener("DOMContentLoaded", () => {
   document.body.addEventListener("click", (e) => {
     const delTxn = e.target.closest("[data-del-txn]");
     if (delTxn) return handleDeleteTransaction(delTxn.dataset.delTxn);
+    const editAcc = e.target.closest("[data-edit-acc]");
+    if (editAcc) return startEditAccount(editAcc.dataset.editAcc);
     const delAcc = e.target.closest("[data-del-acc]");
     if (delAcc) return handleDeleteAccount(delAcc.dataset.delAcc);
     const delCat = e.target.closest("[data-del-cat]");
